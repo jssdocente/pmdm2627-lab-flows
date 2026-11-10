@@ -35,11 +35,22 @@ class VigilanteDeJugador(
     val fallos get() = errores.get()
 
     fun iniciar() {
-        TODO("Pendiente de implementar")
+        scope.launch {
+            while (true) {
+                if (intentar { api.logros(jugadorId) }.isSuccess) logros.incrementAndGet() else errores.incrementAndGet()
+                delay(PERIODO_MS)
+            }
+        }
+        scope.launch {
+            while (true) {
+                if (intentar { api.amigos(jugadorId) }.isSuccess) amigos.incrementAndGet() else errores.incrementAndGet()
+                delay(PERIODO_MS)
+            }
+        }
     }
 
     fun detener() {
-        TODO("Pendiente de implementar")
+        scope.cancel()
     }
 
     companion object {

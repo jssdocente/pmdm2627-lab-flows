@@ -31,5 +31,9 @@ class PanelDeJugador(
  *
  * Pista: es `cargarPortadaResistente`, con una sección opcional más.
  */
-suspend fun cargarPanelDeJugador(api: MercadoApi, jugadorId: Int): PanelDeJugador =
-    TODO("Pendiente de implementar")
+suspend fun cargarPanelDeJugador(api: MercadoApi, jugadorId: Int): PanelDeJugador = supervisorScope {
+    val perfil = async { api.perfil(jugadorId) }
+    val logros = async { api.logros(jugadorId) }
+    val amigos = async { api.amigos(jugadorId) }
+    PanelDeJugador(perfil.await(), intentar { logros.await() }, intentar { amigos.await() })
+}
