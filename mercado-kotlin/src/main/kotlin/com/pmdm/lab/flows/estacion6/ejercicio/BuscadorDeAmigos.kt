@@ -8,7 +8,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 /** Un amigo de los resultados, con una marca de si es favorito. */
@@ -48,5 +55,15 @@ class BuscadorDeAmigos(
         favoritos.update { if (amigoId in it) it - amigoId else it + amigoId }
     }
 
-    val resultados: StateFlow<List<AmigoMarcado>> = TODO("Pendiente de implementar")
+    val resultados: StateFlow<List<AmigoMarcado>> = combine(
+        consulta
+            .debounce(esperaMs)
+            .distinctUntilChanged()
+            .flatMapLatest { texto ->
+                flow { emit(api.amigos(jugadorId).filter { it.nombre.contains(texto, ignoreCase = true) }) }
+            },
+        favoritos,
+    ) { amigos, marcados ->
+        amigos.map { AmigoMarcado(it, it.id in marcados) }
+    }.stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }
