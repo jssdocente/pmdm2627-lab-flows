@@ -2,6 +2,13 @@ package com.pmdm.lab.flows.estacion4.ejercicio
 
 import com.pmdm.lab.flows.api.MercadoApi
 import com.pmdm.lab.flows.modelo.ResumenMercado
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 
 /**
  * TU TURNO · parte 1 (flujo FRÍO).
@@ -14,8 +21,12 @@ import com.pmdm.lab.flows.modelo.ResumenMercado
  *
  * Pista: es `contarConexionesPrecios`, con otro flujo.
  */
-suspend fun contarConexionesRanking(api: MercadoApi, colectores: Int): Int =
-    TODO("Pendiente de implementar")
+suspend fun contarConexionesRanking(api: MercadoApi, colectores: Int): Int = coroutineScope {
+    List(colectores) {
+        launch { api.ranking().take(3).collect { } }
+    }.joinAll()
+    api.estadisticas().conexionesRanking
+}
 
 /**
  * TU TURNO · parte 2 (flujo CALIENTE).
@@ -28,5 +39,7 @@ suspend fun contarConexionesRanking(api: MercadoApi, colectores: Int): Int =
  *
  * Pista: un `StateFlow` **siempre tiene un valor**, aunque llegues tarde. Y `first()` toma solo el primero.
  */
-suspend fun resumenParaColectorTardio(api: MercadoApi, esperaMs: Long): ResumenMercado =
-    TODO("Pendiente de implementar")
+suspend fun resumenParaColectorTardio(api: MercadoApi, esperaMs: Long): ResumenMercado {
+    delay(esperaMs)
+    return api.resumen.first()
+}
