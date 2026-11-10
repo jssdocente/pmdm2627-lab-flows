@@ -4,6 +4,9 @@ import com.pmdm.lab.flows.api.MercadoApi
 import com.pmdm.lab.flows.modelo.Amigo
 import com.pmdm.lab.flows.modelo.Logro
 import com.pmdm.lab.flows.modelo.Perfil
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 /** Lo que muestra la pantalla de un jugador: su perfil, sus logros y sus amigos. */
 class FichaDeJugador(val perfil: Perfil, val logros: List<Logro>, val amigos: List<Amigo>)
@@ -17,8 +20,12 @@ class FichaDeJugador(val perfil: Perfil, val logros: List<Logro>, val amigos: Li
  *
  * Pista: mira cómo `cargarVitrinaParalela` lanza los detalles con `async`.
  */
-suspend fun cargarFicha(api: MercadoApi, jugadorId: Int): FichaDeJugador =
-    TODO("Pendiente de implementar")
+suspend fun cargarFicha(api: MercadoApi, jugadorId: Int): FichaDeJugador = coroutineScope {
+    val perfil = async { api.perfil(jugadorId) }
+    val logros = async { api.logros(jugadorId) }
+    val amigos = async { api.amigos(jugadorId) }
+    FichaDeJugador(perfil.await(), logros.await(), amigos.await())
+}
 
 /**
  * TU TURNO · parte 2.
@@ -31,5 +38,8 @@ suspend fun cargarFicha(api: MercadoApi, jugadorId: Int): FichaDeJugador =
  *
  * Pista: es el mismo patrón «lo dependiente, en orden; lo independiente, a la vez».
  */
-suspend fun cargarFichasDeAmigos(api: MercadoApi, jugadorId: Int): List<FichaDeJugador> =
-    TODO("Pendiente de implementar")
+suspend fun cargarFichasDeAmigos(api: MercadoApi, jugadorId: Int): List<FichaDeJugador> = coroutineScope {
+    api.amigos(jugadorId)
+        .map { amigo -> async { cargarFicha(api, amigo.id) } }
+        .awaitAll()
+}
