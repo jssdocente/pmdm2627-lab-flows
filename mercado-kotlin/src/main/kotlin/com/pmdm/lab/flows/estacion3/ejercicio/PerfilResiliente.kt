@@ -1,7 +1,10 @@
 package com.pmdm.lab.flows.estacion3.ejercicio
 
 import com.pmdm.lab.flows.api.MercadoApi
+import com.pmdm.lab.flows.modelo.ErrorMercado
 import com.pmdm.lab.flows.modelo.Perfil
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * TU TURNO · parte 1.
@@ -24,4 +27,15 @@ suspend fun cargarPerfilResiliente(
     intentos: Int = 3,
     limiteMs: Long = 1_000,
     pausaMs: Long = 200,
-): Perfil = TODO("Pendiente de implementar")
+): Perfil {
+    repeat(intentos) { intento ->
+        val perfil = try {
+            withTimeoutOrNull(limiteMs) { api.perfil(jugadorId) }
+        } catch (e: ErrorMercado) {
+            null
+        }
+        if (perfil != null) return perfil
+        if (intento < intentos - 1) delay(pausaMs)
+    }
+    throw ErrorMercado("No se pudo cargar el perfil del jugador $jugadorId tras $intentos intentos")
+}

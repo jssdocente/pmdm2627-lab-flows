@@ -1,9 +1,11 @@
 package com.pmdm.lab.flows.estacion3.ejercicio
 
 import com.pmdm.lab.flows.api.MercadoApi
+import com.pmdm.lab.flows.modelo.ErrorMercado
 import com.pmdm.lab.flows.modelo.Perfil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /** Los estados posibles de la pantalla del jugador. */
 sealed interface EstadoJugador {
@@ -33,10 +35,18 @@ class PantallaDeJugador(private val api: MercadoApi, private val scope: Coroutin
     private var carga: Job? = null
 
     fun abrir(jugadorId: Int) {
-        TODO("Pendiente de implementar")
+        carga?.cancel()
+        carga = scope.launch {
+            estado = EstadoJugador.Cargando
+            estado = try {
+                EstadoJugador.Listo(api.perfil(jugadorId))
+            } catch (e: ErrorMercado) {
+                EstadoJugador.Error(e.message ?: "Error desconocido")
+            }
+        }
     }
 
     fun cerrar() {
-        TODO("Pendiente de implementar")
+        carga?.cancel()
     }
 }
