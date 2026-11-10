@@ -1,0 +1,9 @@
+build/
+.gradle/
+.kotlin/
+.idea/
+*.iml
+.DS_Store
+
+# La IP del servidor es personal: se copia de mercado.properties.ejemplo
+mercado.properties

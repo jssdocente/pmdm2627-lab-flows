@@ -1,0 +1,6 @@
+# Copia este fichero como «mercado.properties» (en la misma carpeta) y cambia el valor.
+#
+#   simulado       -> sin red: todo funciona dentro de tu propio programa (opción por defecto)
+#   192.168.1.34   -> la IP que imprime el servidor de tu pareja al arrancar
+servidor.host=simulado
+servidor.puerto=8080
