@@ -15,7 +15,7 @@ import java.net.NetworkInterface
  *     ./gradlew :servidor:run
  */
 fun main(args: Array<String>) {
-    val puerto = args.firstOrNull()?.toIntOrNull() ?: 8080
+    val puerto = args.firstOrNull()?.toIntOrNull() ?: 8099
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val mercado = MercadoSimulado(scope)
 
