@@ -4,7 +4,10 @@ import com.pmdm.lab.flows.api.MercadoApi
 import com.pmdm.lab.flows.modelo.Puesto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * TU TURNO.
@@ -21,9 +24,11 @@ import kotlinx.coroutines.flow.StateFlow
  */
 class TablaDeClasificacion(api: MercadoApi, scope: CoroutineScope) {
 
-    val clasificacion: StateFlow<List<Puesto>> = TODO("Pendiente de implementar")
+    val clasificacion: StateFlow<List<Puesto>> =
+        api.ranking().stateIn(scope, SharingStarted.WhileSubscribed(PARADA_TRAS_MS), emptyList())
 
-    val ultimasClasificaciones: SharedFlow<List<Puesto>> = TODO("Pendiente de implementar")
+    val ultimasClasificaciones: SharedFlow<List<Puesto>> =
+        api.ranking().shareIn(scope, SharingStarted.WhileSubscribed(PARADA_TRAS_MS), replay = 1)
 
     companion object {
         const val PARADA_TRAS_MS = 5_000L
